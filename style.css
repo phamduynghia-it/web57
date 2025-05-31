@@ -1,0 +1,141 @@
+body {
+    margin: 0;
+    background-color: #000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #fff;
+    perspective: 1200px; /* PC */
+    touch-action: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+}
+
+#sparkle-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+}
+
+/* --- Ngôi sao nền lấp lánh --- */
+.sparkle {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation-name: sparkle-blink;
+    animation-iteration-count: infinite;
+    z-index: 0;
+}
+
+@keyframes sparkle-blink {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* --- Sao băng mới --- */
+.shooting-star {
+    position: absolute;
+    width: auto; /* Sẽ được quyết định bởi đuôi */
+    height: var(--shooting-star-length, 100px); /* Độ dài đuôi đặt bởi JS */
+    animation-name: shoot-trajectory;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1);
+    animation-fill-mode: forwards;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0; /* Bắt đầu ẩn */
+    transform-origin: 0 0; /* Xoay quanh điểm đầu (top-left của head) */
+    /* transform (vị trí và góc) sẽ được đặt bởi JS ban đầu, sau đó là animation */
+}
+
+.shooting-star::before { /* Đầu sao băng - "dấu chấm" */
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.8),
+                0 0 20px 5px rgba(220, 220, 255, 0.5);
+    animation: head-fade var(--shooting-star-duration) cubic-bezier(0.3, 0, 0.7, 1) forwards;
+}
+
+.shooting-star::after { /* Đuôi sao băng - "vệt thẳng" */
+    content: "";
+    position: absolute;
+    top: 3px; /* Bắt đầu từ giữa đầu */
+    left: 2.25px; /* Căn giữa với đầu */
+    width: 1.5px; /* Độ rộng của đuôi */
+    height: 100%; /* Chiều dài bằng chiều cao của .shooting-star container */
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.3) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: tail-fade-effect var(--shooting-star-duration) cubic-bezier(0.3, 0, 0.7, 1) forwards;
+}
+
+@keyframes shoot-trajectory {
+    0% {
+        opacity: 0;
+        transform: translate(var(--start-x), var(--start-y)) rotate(var(--angle));
+    }
+    20% { opacity: 1; }
+    85% { opacity: 0.7; }
+    100% {
+        opacity: 0;
+        transform: translate(var(--end-x), var(--end-y)) rotate(var(--angle));
+    }
+}
+@keyframes head-fade {
+    0% { opacity: 0; } 20% { opacity: 1; } 85% { opacity: 0.7;} 100% { opacity: 0; }
+}
+@keyframes tail-fade-effect {
+    0% { opacity: 0; } 20% { opacity: 0.7; } 70% { opacity: 0.5; } 100% { opacity: 0; }
+}
+
+.container {
+    position: relative; width: 100vw; height: 100vh;
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease-out; /* PC */
+    overflow: hidden; z-index: 1;
+}
+
+.falling-text, .falling-heart {
+    position: absolute; white-space: nowrap; user-select: none;
+    animation: fall var(--fall-duration) linear var(--fall-delay) infinite;
+    will-change: transform, opacity;
+}
+
+.falling-text {
+    color: #fff;
+    text-shadow:
+        0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff,
+        0 0 25px #ffdde5, 0 0 35px #ffc0cb;
+}
+
+.falling-text.pink {
+    color: #ff99cc;
+    text-shadow:
+        0 0 5px #fff, 0 0 10px #ffe5f0, 0 0 15px #ffb3da,
+        0 0 25px #ff80bf, 0 0 35px #ff66b3;
+}
+
+.falling-heart {
+    font-size: var(--heart-size); /* Sẽ được set bởi JS qua fontSize */
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.7), 0 0 15px rgba(255, 80, 80, 0.5);
+}
+
+@keyframes fall {
+    0% { transform: translateY(-120px) var(--initial-z-transform); opacity: 0; }
+    5% { opacity: 0.3; } 10% { opacity: 0.8; } 12% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(105vh) var(--initial-z-transform); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    body { perspective: 700px; }
+    .container { transition: transform 0.12s ease-out; }
+}
+@media (max-width: 480px) {
+    body { perspective: 600px; }
+}
